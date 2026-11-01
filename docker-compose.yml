@@ -1,0 +1,64 @@
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: codetwin-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-codetwin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-codetwin_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-codetwin_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-codetwin} -d ${POSTGRES_DB:-codetwin_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    container_name: codetwin-backend
+    restart: always
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-codetwin}:${POSTGRES_PASSWORD:-codetwin_secret}@db:5432/${POSTGRES_DB:-codetwin_db}
+      DOCKER_SANDBOX_ENABLED: "false"
+      STORAGE_DIR: /app/storage
+      REPOS_DIR: /app/storage/repos
+      UPLOADS_DIR: /app/storage/uploads
+      CORS_ORIGINS: '["http://localhost:3000","http://127.0.0.1:3000"]'
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/storage:/app/storage
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/api/v1/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+      args:
+        BACKEND_URL: http://backend:8000
+    container_name: codetwin-frontend
+    restart: always
+    environment:
+      BACKEND_URL: http://backend:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  pgdata:

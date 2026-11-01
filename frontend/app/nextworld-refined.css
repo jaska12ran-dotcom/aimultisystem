@@ -1,0 +1,228 @@
+/* ==========================================================================
+   CODETWIN NEXTWORLD — ELEGANT POLISH & REFINED MOTION LAYER
+   Subtle scroll reveals, smooth transitions, refined feedback, accessible focus,
+   depth layers, and high-performance spring motion with reduced-motion support.
+   ========================================================================== */
+
+/* ── Typography & Smooth Rendering ─────────────────────────────────────── */
+.world-page {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Focus Rings & Keyboard Accessibility ──────────────────────────────── */
+.world-nav a:focus-visible,
+.world-nav-cta:focus-visible,
+.world-button:focus-visible,
+.world-console-tab:focus-visible,
+.world-flow-step:focus-visible,
+.world-video-open:focus-visible,
+.world-card:focus-visible,
+.world-inline-link:focus-visible {
+  outline: 2px solid var(--w-cyan) !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 0 5px rgba(125, 249, 255, 0.22) !important;
+}
+
+/* ── Refined Micro-Feedback Animations ─────────────────────────────────── */
+.world-button,
+.world-nav-cta,
+.world-console-tab,
+.world-flow-step,
+.world-video-open {
+  transform: translateZ(0);
+  will-change: transform, box-shadow;
+  transition:
+    transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.18s ease;
+}
+
+/* Active click feedback — crisp, snappy scale bounce */
+.world-button:active,
+.world-nav-cta:active,
+.world-flow-step:active,
+.world-video-open:active {
+  transform: scale(0.975) translateY(1px) !important;
+  transition-duration: 0.08s !important;
+}
+
+.world-console-tab:active {
+  transform: scale(0.985) !important;
+}
+
+/* ── Refined Buttons & Soft Gradient Depth ─────────────────────────────── */
+.world-button-primary {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(125, 249, 255, 0.95) 28%,
+    rgba(167, 139, 250, 0.9) 72%,
+    rgba(255, 180, 122, 0.85) 100%
+  ) !important;
+  color: #030810 !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.08em !important;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.5) inset,
+    0 12px 32px rgba(45, 190, 215, 0.24),
+    0 2px 6px rgba(0, 0, 0, 0.35) !important;
+}
+
+.world-button-primary:hover {
+  transform: translateY(-2px) scale(1.01) !important;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.7) inset,
+    0 16px 42px rgba(45, 190, 215, 0.38),
+    0 0 20px rgba(125, 249, 255, 0.28) !important;
+}
+
+.world-button-ghost {
+  background: rgba(8, 16, 28, 0.6) !important;
+  border: 1px solid rgba(160, 205, 235, 0.18) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 8px 24px rgba(0, 0, 0, 0.25) !important;
+}
+
+.world-button-ghost:hover {
+  transform: translateY(-2px) !important;
+  border-color: rgba(125, 249, 255, 0.45) !important;
+  background: rgba(12, 24, 40, 0.75) !important;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.1) inset,
+    0 12px 30px rgba(0, 0, 0, 0.35),
+    0 0 24px rgba(125, 249, 255, 0.12) !important;
+}
+
+/* ── Section Dividers & Soft Radial Separators ──────────────────────────── */
+.world-section {
+  position: relative;
+}
+
+.world-section::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(150, 200, 235, 0.08) 25%,
+    rgba(125, 249, 255, 0.2) 50%,
+    rgba(150, 200, 235, 0.08) 75%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+/* ── Elevated Glass Cards ──────────────────────────────────────────────── */
+.world-card {
+  backdrop-filter: blur(20px) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.2) !important;
+  border: 1px solid rgba(160, 210, 235, 0.12) !important;
+  transition:
+    transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.22s ease,
+    box-shadow 0.24s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.world-card:hover {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.09) inset,
+    0 28px 70px rgba(0, 0, 0, 0.45),
+    0 0 35px color-mix(in srgb, var(--card-accent, var(--w-cyan)) 12%, transparent) !important;
+}
+
+/* ── Interactive Scan Feedback Button ──────────────────────────────────── */
+.world-scan {
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+}
+
+.world-scan:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+/* ── Refined Console Tabs ──────────────────────────────────────────────── */
+.world-console-tab {
+  position: relative;
+  border-radius: 8px;
+}
+
+.world-console-tab:hover {
+  background: rgba(125, 249, 255, 0.05) !important;
+}
+
+.world-console-tab.is-active {
+  background: linear-gradient(
+    95deg,
+    rgba(125, 249, 255, 0.12) 0%,
+    rgba(167, 139, 250, 0.06) 100%
+  ) !important;
+  border-color: rgba(125, 249, 255, 0.3) !important;
+}
+
+/* ── Refined Flow Step Interaction ─────────────────────────────────────── */
+.world-flow-step {
+  border-radius: 12px;
+  background: rgba(6, 12, 20, 0.25);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.world-flow-step:hover {
+  background: rgba(12, 22, 34, 0.6) !important;
+  transform: translateY(-2px);
+}
+
+.world-flow-step.is-active {
+  background: linear-gradient(
+    145deg,
+    rgba(125, 249, 255, 0.09) 0%,
+    rgba(167, 139, 250, 0.05) 100%
+  ) !important;
+  border-color: rgba(125, 249, 255, 0.32) !important;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.05) inset,
+    0 16px 36px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* ── Touch Optimization ────────────────────────────────────────────────── */
+@media (pointer: coarse) {
+  .world-button,
+  .world-nav-cta,
+  .world-console-tab,
+  .world-flow-step {
+    min-height: 48px;
+  }
+
+  .world-tilt {
+    transform: none !important;
+  }
+}
+
+/* ── Reduced Motion Overrides ──────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .world-page *,
+  .world-page *::before,
+  .world-page *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .world-tilt,
+  .world-video-tilt,
+  .world-video-media {
+    transform: none !important;
+  }
+}

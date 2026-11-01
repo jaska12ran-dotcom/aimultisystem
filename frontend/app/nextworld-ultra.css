@@ -1,0 +1,565 @@
+/* ==========================================================================
+   CODETWIN NEXTWORLD — ULTRA LAYER
+   Next-level 3D effects, holographic visuals, plasma fields, and neon palettes.
+   All selectors remain under .world-* namespace.
+   ========================================================================== */
+
+/* ── extended palette ──────────────────────────────────────────────────── */
+
+.world-page {
+  --w-plasma:    #00fff7;
+  --w-neon-pink: #ff00ea;
+  --w-neon-lime: #aaff00;
+  --w-ultraviolet: #7b00ff;
+  --w-gold:      #ffd700;
+  --w-ice:       #caf0ff;
+
+  /* dynamic signal palette (overridden per-signal via JS) */
+  --w-signal-primary:   var(--w-cyan);
+  --w-signal-secondary: var(--w-violet);
+  --w-signal-glow:      rgba(125, 249, 255, 0.35);
+}
+
+/* ── backdrop ultra ─────────────────────────────────────────────────────── */
+
+/* Hexagon grid overlay — creates a sci-fi grid feel */
+.world-backdrop-hex {
+  position: absolute;
+  inset: 0;
+  opacity: 0.06;
+  pointer-events: none;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100' viewBox='0 0 56 100'%3E%3Cpath d='M28 2 L54 17 L54 47 L28 62 L2 47 L2 17 Z' fill='none' stroke='rgba(125,249,255,0.6)' stroke-width='0.5'/%3E%3Cpath d='M28 62 L54 77 L54 107 L28 122 L2 107 L2 77 Z' fill='none' stroke='rgba(125,249,255,0.6)' stroke-width='0.5'/%3E%3C/svg%3E");
+  background-size: 56px 100px;
+  background-position: 0 0;
+  animation: world-hex-drift 60s linear infinite;
+}
+
+@keyframes world-hex-drift {
+  from { background-position: 0 0; }
+  to   { background-position: 56px 100px; }
+}
+
+/* Plasma aurora — a vivid third aurora layer */
+.world-backdrop-aurora-d {
+  position: absolute;
+  top: 60%;
+  left: 25%;
+  width: 50vw;
+  height: 44vw;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0;
+  mix-blend-mode: screen;
+  background: radial-gradient(circle, rgba(255, 0, 234, 0.28), rgba(123, 0, 255, 0.08) 60%, transparent 72%);
+  animation: world-drift 40s ease-in-out infinite alternate, world-plasma-pulse 8s ease-in-out infinite;
+}
+
+@keyframes world-plasma-pulse {
+  0%, 100% { opacity: 0.08; }
+  50%       { opacity: 0.22; }
+}
+
+/* Scanline overlay on entire page — subtle CRT feel */
+.world-backdrop-crt {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    180deg,
+    transparent,
+    transparent 3px,
+    rgba(0, 255, 247, 0.012) 3px,
+    rgba(0, 255, 247, 0.012) 4px
+  );
+  z-index: 1;
+}
+
+/* Horizon glow line — enhanced */
+.world-backdrop-horizon::before {
+  content: "";
+  position: absolute;
+  left: 20%;
+  right: 20%;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 247, 0.7), rgba(167, 139, 250, 0.5), transparent);
+  filter: blur(2px);
+  animation: world-horizon-pulse 4s ease-in-out infinite;
+}
+
+@keyframes world-horizon-pulse {
+  0%, 100% { opacity: 0.4; }
+  50%       { opacity: 1; }
+}
+
+/* ── navbar ultra ───────────────────────────────────────────────────────── */
+
+/* Animated gradient border on the nav */
+.world-nav {
+  position: fixed;
+  top: 16px;
+  /* Override: add animated gradient border via pseudo element */
+}
+
+.world-nav::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  border-radius: 17px;
+  background: linear-gradient(
+    90deg,
+    rgba(125, 249, 255, 0.35),
+    rgba(167, 139, 250, 0.25),
+    rgba(255, 180, 122, 0.2),
+    rgba(125, 249, 255, 0.35)
+  );
+  background-size: 300% 100%;
+  animation: world-nav-border 8s linear infinite;
+  opacity: 0.5;
+}
+
+@keyframes world-nav-border {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 300% 50%; }
+}
+
+/* Logo pulse rings */
+.world-logo::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 14px;
+  border: 1px solid rgba(125, 249, 255, 0.2);
+  animation: world-logo-ring 3s ease-out infinite;
+}
+
+@keyframes world-logo-ring {
+  0%   { transform: scale(1); opacity: 0.5; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+/* ── hero ultra ─────────────────────────────────────────────────────────── */
+
+/* Hero title — enhanced gradient with animated hue shift */
+.world-hero-title > span:last-child {
+  background: linear-gradient(
+    112deg,
+    #ffffff 0%,
+    var(--w-plasma) 25%,
+    var(--w-violet) 52%,
+    var(--w-amber) 78%,
+    #ffffff 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  background-size: 200% 100%;
+  animation: world-title-gradient 8s ease-in-out infinite alternate;
+  filter: drop-shadow(0 0 40px rgba(125, 249, 255, 0.2));
+}
+
+@keyframes world-title-gradient {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+/* HUD panel — neon border shimmer */
+.world-hero-hud {
+  position: relative;
+  overflow: visible;
+}
+
+.world-hero-hud::before,
+.world-hero-hud::after {
+  animation: world-corner-flicker 4s ease-in-out infinite;
+}
+
+@keyframes world-corner-flicker {
+  0%, 90%, 100% { border-color: rgba(125, 249, 255, 0.4); }
+  95%            { border-color: rgba(125, 249, 255, 0.9); }
+}
+
+/* HUD readout numbers — glow effect */
+.world-hud-readout b {
+  text-shadow: 0 0 20px rgba(125, 249, 255, 0.5);
+  transition: text-shadow 0.4s ease, color 0.4s ease;
+}
+
+.world-hud-readout b:hover {
+  text-shadow: 0 0 40px rgba(125, 249, 255, 0.9), 0 0 80px rgba(125, 249, 255, 0.4);
+  color: #ffffff;
+}
+
+/* Primary CTA button — ultra glow animation */
+.world-button-primary {
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.18) inset,
+    0 14px 40px rgba(90, 220, 235, 0.25),
+    0 0 60px rgba(125, 249, 255, 0.1);
+  animation: world-cta-breathe 3s ease-in-out infinite;
+}
+
+@keyframes world-cta-breathe {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(255,255,255,0.18) inset, 0 14px 40px rgba(90,220,235,0.25), 0 0 60px rgba(125,249,255,0.1); }
+  50%       { box-shadow: 0 0 0 1px rgba(255,255,255,0.22) inset, 0 18px 60px rgba(90,220,235,0.38), 0 0 100px rgba(125,249,255,0.22); }
+}
+
+/* Scan button — animated sweep line */
+.world-scan {
+  animation: world-scan-glow 3s ease-in-out infinite;
+}
+
+@keyframes world-scan-glow {
+  0%, 100% { box-shadow: 0 0 12px rgba(125, 249, 255, 0.1); }
+  50%       { box-shadow: 0 0 28px rgba(125, 249, 255, 0.28); }
+}
+
+/* Hero floating video — enhanced shadow + rotation */
+.world-hero-video {
+  filter: drop-shadow(0 24px 64px rgba(125, 249, 255, 0.2));
+  animation: world-float-ultra 9s ease-in-out infinite;
+}
+
+@keyframes world-float-ultra {
+  0%   { transform: rotate(-1.8deg) translate3d(0, 0, 0); filter: drop-shadow(0 24px 64px rgba(125, 249, 255, 0.2)); }
+  33%  { transform: rotate(-0.4deg) translate3d(2px, -14px, 0); filter: drop-shadow(0 36px 80px rgba(125, 249, 255, 0.35)); }
+  66%  { transform: rotate(-2.4deg) translate3d(-2px, -6px, 0); filter: drop-shadow(0 20px 50px rgba(167, 139, 250, 0.3)); }
+  100% { transform: rotate(-1.8deg) translate3d(0, 0, 0); filter: drop-shadow(0 24px 64px rgba(125, 249, 255, 0.2)); }
+}
+
+/* ── floating video ultra ───────────────────────────────────────────────── */
+
+/* Video frame — holographic border shimmer */
+.world-video {
+  position: relative;
+  border-color: transparent;
+  background-clip: padding-box;
+}
+
+.world-video::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  border-radius: 14px;
+  background: linear-gradient(
+    135deg,
+    rgba(125, 249, 255, 0.5),
+    rgba(167, 139, 250, 0.35),
+    rgba(255, 180, 122, 0.25),
+    rgba(125, 249, 255, 0.5)
+  );
+  background-size: 400% 400%;
+  animation: world-hologram-border 6s ease-in-out infinite;
+  opacity: 0.6;
+}
+
+@keyframes world-hologram-border {
+  0%   { background-position: 0% 50%;   opacity: 0.4; }
+  50%  { background-position: 100% 50%; opacity: 0.8; }
+  100% { background-position: 0% 50%;   opacity: 0.4; }
+}
+
+/* Video glare — wider, more cinematic */
+.world-video-glare {
+  background: radial-gradient(
+    ellipse at var(--video-glare-x) var(--video-glare-y),
+    rgba(255, 255, 255, 0.22),
+    rgba(125, 249, 255, 0.08) 28%,
+    rgba(167, 139, 250, 0.04) 48%,
+    transparent 62%
+  );
+}
+
+/* Video corner brackets — glowing */
+.world-video-corners i {
+  border-color: var(--w-plasma);
+  box-shadow: 0 0 8px rgba(0, 255, 247, 0.6);
+  animation: world-corner-glow 2.5s ease-in-out infinite;
+}
+
+@keyframes world-corner-glow {
+  0%, 100% { opacity: 0.5; box-shadow: 0 0 8px rgba(0, 255, 247, 0.6); }
+  50%       { opacity: 1;   box-shadow: 0 0 16px rgba(0, 255, 247, 0.9), 0 0 32px rgba(0, 255, 247, 0.4); }
+}
+
+/* Video shadow — ultra deep */
+.world-video-shadow {
+  background: rgba(20, 180, 195, 0.22);
+  filter: blur(32px);
+  animation: world-shadow-pulse 5s ease-in-out infinite;
+}
+
+@keyframes world-shadow-pulse {
+  0%, 100% { opacity: 0.6; transform: scaleX(0.9); }
+  50%       { opacity: 1;   transform: scaleX(1.1); }
+}
+
+/* ── ticker ultra ───────────────────────────────────────────────────────── */
+
+.world-ticker-track span {
+  color: rgba(125, 249, 255, 0.6);
+  transition: color 0.3s ease;
+}
+
+.world-ticker-track span:hover {
+  color: rgba(125, 249, 255, 1);
+  text-shadow: 0 0 20px rgba(125, 249, 255, 0.8);
+}
+
+.world-ticker-track i {
+  border-color: rgba(125, 249, 255, 0.7);
+  box-shadow: 0 0 6px rgba(125, 249, 255, 0.5);
+  animation: world-diamond-spin 4s linear infinite;
+}
+
+@keyframes world-diamond-spin {
+  from { transform: rotate(45deg); }
+  to   { transform: rotate(405deg); }
+}
+
+/* ── metric cards ultra ─────────────────────────────────────────────────── */
+
+.world-metric-number {
+  background: linear-gradient(135deg, #ffffff 0%, var(--w-plasma) 50%, var(--w-violet) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  background-size: 200% 200%;
+  animation: world-metric-gradient 6s ease-in-out infinite;
+  filter: drop-shadow(0 0 20px rgba(125, 249, 255, 0.3));
+}
+
+@keyframes world-metric-gradient {
+  0%, 100% { background-position: 0% 0%; }
+  50%       { background-position: 100% 100%; }
+}
+
+.world-metric {
+  transition: background 0.4s ease;
+}
+
+.world-metric:hover {
+  background: rgba(125, 249, 255, 0.03);
+}
+
+.world-metric:hover .world-metric-number {
+  filter: drop-shadow(0 0 40px rgba(125, 249, 255, 0.6));
+}
+
+/* ── console ultra ──────────────────────────────────────────────────────── */
+
+/* Console panel — animated corner accents */
+.world-console {
+  position: relative;
+}
+
+.world-console::before,
+.world-console::after {
+  content: "";
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-color: rgba(125, 249, 255, 0.4);
+  border-style: solid;
+  pointer-events: none;
+  animation: world-console-corner-glow 3s ease-in-out infinite;
+}
+
+.world-console::before {
+  top: -1px;
+  left: -1px;
+  border-width: 2px 0 0 2px;
+  border-radius: 6px 0 0;
+}
+
+.world-console::after {
+  bottom: -1px;
+  right: -1px;
+  border-width: 0 2px 2px 0;
+  border-radius: 0 0 6px;
+}
+
+@keyframes world-console-corner-glow {
+  0%, 100% { border-color: rgba(125, 249, 255, 0.4); }
+  50%       { border-color: rgba(125, 249, 255, 0.9); box-shadow: 0 0 12px rgba(125, 249, 255, 0.4); }
+}
+
+/* Active tab — accent glow */
+.world-console-tab.is-active {
+  box-shadow:
+    0 0 40px rgba(125, 249, 255, 0.06) inset,
+    0 2px 0 rgba(125, 249, 255, 0.3) inset,
+    0 -1px 0 rgba(125, 249, 255, 0.1) inset;
+}
+
+/* Console screen — enhanced chromatic aberration on hover */
+.world-console-screen {
+  transition: filter 0.4s ease;
+}
+
+.world-console-screen:hover {
+  filter: saturate(1.3) contrast(1.1);
+}
+
+.world-console-screen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  background: linear-gradient(
+    180deg,
+    transparent 60%,
+    rgba(125, 249, 255, 0.04)
+  );
+  pointer-events: none;
+  animation: world-console-sweep 6s ease-in-out infinite;
+}
+
+@keyframes world-console-sweep {
+  0%   { opacity: 0; }
+  45%  { opacity: 1; }
+  55%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ── system cards ultra ─────────────────────────────────────────────────── */
+
+.world-card {
+  transition: transform 0.16s ease-out, border-color 0.25s ease, box-shadow 0.25s ease, background 0.3s ease;
+}
+
+/* 3D icon — floating effect */
+.world-card-icon {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+}
+
+.world-card:hover .world-card-icon {
+  transform: translateY(-4px) scale(1.1);
+  box-shadow:
+    0 8px 30px color-mix(in srgb, var(--card-accent) 30%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--card-accent) 40%, transparent);
+}
+
+/* Card title glow on hover */
+.world-card:hover h3 {
+  color: var(--card-accent);
+  text-shadow: 0 0 30px color-mix(in srgb, var(--card-accent) 30%, transparent);
+  transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+
+/* Tag chips — glow on hover */
+.world-card-tags span {
+  transition: border-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+}
+
+.world-card:hover .world-card-tags span {
+  border-color: color-mix(in srgb, var(--card-accent) 30%, transparent);
+  color: color-mix(in srgb, var(--card-accent) 80%, white);
+  background: color-mix(in srgb, var(--card-accent) 6%, transparent);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--card-accent) 20%, transparent);
+}
+
+/* Animated background noise texture for cards */
+.world-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+/* ── reels ultra ────────────────────────────────────────────────────────── */
+
+/* Portal rings — neon glow */
+.world-reels-portal span {
+  box-shadow:
+    inset 0 0 80px rgba(125, 249, 255, 0.04),
+    0 0 30px rgba(125, 249, 255, 0.06);
+}
+
+.world-reels-portal span:nth-child(1) {
+  border-color: rgba(125, 249, 255, 0.18);
+}
+
+.world-reels-portal span:nth-child(2) {
+  border-color: rgba(167, 139, 250, 0.2);
+}
+
+.world-reels-portal span:nth-child(3) {
+  border-color: rgba(255, 180, 122, 0.15);
+}
+
+/* Reel shadow — glowing puddle */
+.world-reel-shadow {
+  background: linear-gradient(
+    to bottom,
+    rgba(25, 190, 200, 0.2),
+    rgba(125, 249, 255, 0.08)
+  );
+  filter: blur(60px);
+}
+
+/* ── flow ultra ─────────────────────────────────────────────────────────── */
+
+/* Flow line — glowing pulse */
+.world-flow-line span {
+  box-shadow: 0 0 20px rgba(125, 249, 255, 0.5), 0 0 60px rgba(125, 249, 255, 0.2);
+}
+
+/* Active step — glowing border */
+.world-flow-step.is-active {
+  box-shadow:
+    0 0 30px rgba(125, 249, 255, 0.08),
+    inset 0 1px 0 rgba(125, 249, 255, 0.1);
+}
+
+/* Flow node dot — pulsing */
+.world-flow-node i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--w-cyan);
+  box-shadow: 0 0 12px var(--w-cyan);
+  animation: world-pulse 2.2s ease-in-out infinite;
+}
+
+.world-flow-step.is-active .world-flow-node {
+  border-color: rgba(125, 249, 255, 0.6);
+  box-shadow: 0 0 20px rgba(125, 249, 255, 0.3);
+}
+
+/* ── scroll progress ultra ──────────────────────────────────────────────── */
+
+.world-scroll-progress {
+  height: 3px;
+  background: linear-gradient(90deg,
+    var(--w-plasma),
+    var(--w-cyan) 28%,
+    var(--w-violet) 58%,
+    var(--w-amber) 82%,
+    var(--w-neon-pink)
+  );
+  box-shadow: 0 0 20px rgba(125, 249, 255, 0.7), 0 0 60px rgba(125, 249, 255, 0.3);
+}
+
+/* /* ── launch section ultra ───────────────────────────────────────────────── */
+.world-launch-panel {
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── footer ultra ───────────────────────────────────────────────────────── */
+.world-footer-base i {
+  background: var(--w-cyan);
+  box-shadow: 0 0 10px var(--w-cyan);
+}

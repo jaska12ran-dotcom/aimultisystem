@@ -1,0 +1,19 @@
+# Requirements for embedding model training on CodeSearchNet
+# Install in a Python 3.10+ environment:
+#   pip install -r training/requirements_embedding.txt
+
+# Core training stack
+sentence-transformers>=3.0,<4
+datasets>=2.14,<4
+transformers>=4.40,<5
+accelerate>=0.27
+
+# PyTorch — install the GPU build manually if you have CUDA:
+#   pip install torch --index-url https://download.pytorch.org/whl/cu121
+torch>=2.1
+
+# Optional: faster tokenisation
+tokenizers>=0.15
+
+# Optional: progress bars
+tqdm>=4.65

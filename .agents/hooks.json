@@ -1,0 +1,31 @@
+{
+  "safety-gate": {
+    "enabled": true,
+    "PreToolUse": [
+      {
+        "matcher": "run_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .agents/hooks/safety_gate.py",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  },
+  "diff-validation": {
+    "enabled": true,
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .agents/hooks/validate_diff.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

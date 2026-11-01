@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "policy": "Registry only. No benchmark data, source repositories, or patches are downloaded or redistributed by this project. Recheck current dataset, repository, and benchmark terms before each use.",
+  "benchmarks": {
+    "swe-bench": {
+      "display_name": "SWE-bench",
+      "upstream": "https://github.com/SWE-bench/SWE-bench",
+      "task": "Issue-driven repository-level bug fixing; evaluate resolved instances with the upstream harness.",
+      "license_review": "required",
+      "notes": "Dataset terms and each referenced repository's source license are separate. Use the official harness and permitted split; do not train on evaluation instances."
+    },
+    "swe-bench-lite": {
+      "display_name": "SWE-bench Lite",
+      "upstream": "https://huggingface.co/datasets/princeton-nlp/SWE-bench_Lite",
+      "task": "Smaller SWE-bench issue-resolution subset; use the official subset definition and harness.",
+      "license_review": "required",
+      "notes": "Confirm the subset's current distribution terms and each referenced repository license. Prevent overlap with training repositories and instances."
+    },
+    "codesearchnet": {
+      "display_name": "CodeSearchNet",
+      "upstream": "https://github.com/github/CodeSearchNet",
+      "task": "Code search and natural-language/code retrieval.",
+      "license_review": "required",
+      "notes": "Review dataset terms and licenses of underlying repositories; use official splits and do not redistribute source snapshots by default."
+    },
+    "codexglue": {
+      "display_name": "CodeXGLUE",
+      "upstream": "https://github.com/microsoft/CodeXGLUE",
+      "task": "Software engineering tasks including code search, completion, translation, and defect detection.",
+      "license_review": "required",
+      "notes": "The benchmark aggregates tasks and source corpora; verify terms for the selected task and all underlying data separately."
+    },
+    "defects4j": {
+      "display_name": "Defects4J",
+      "upstream": "https://github.com/rjust/defects4j",
+      "task": "Java real-world bugs with reproducible buggy/fixed versions and tests.",
+      "license_review": "required",
+      "notes": "Install/use the official project tooling; inspect licenses of Defects4J and every project under test. Do not bundle checked-out projects."
+    },
+    "bugsinpy": {
+      "display_name": "BugsInPy",
+      "upstream": "https://github.com/soarsmu/BugsInPy",
+      "task": "Python real-world bug benchmark with project-specific setup and test commands.",
+      "license_review": "required",
+      "notes": "Inspect benchmark and per-project licenses and setup instructions before checkout or execution."
+    },
+    "quixbugs": {
+      "display_name": "QuixBugs",
+      "upstream": "https://github.com/jkoppel/QuixBugs",
+      "task": "Small algorithmic bug-fixing benchmark with Java and Python implementations.",
+      "license_review": "required",
+      "notes": "Verify the upstream license and terms for the exact distribution/version used."
+    }
+  }
+}

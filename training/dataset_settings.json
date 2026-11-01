@@ -1,0 +1,20 @@
+{
+  "dataset_id": "sentence-transformers/codesearchnet",
+  "config": "pair",
+  "split": "train",
+  "limit": 20000,
+  "output": "datasets/processed/codesearchnet_pair_sample.jsonl",
+  "features": {
+    "comment": "string",
+    "code": "string"
+  },
+  "required_content_fields": [
+    "comment",
+    "code"
+  ],
+  "deduplicate_fields": [
+    "comment",
+    "code"
+  ],
+  "_comment": "Targets the pair config published by sentence-transformers/codesearchnet; comment is the natural-language description and code is the source snippet."
+}

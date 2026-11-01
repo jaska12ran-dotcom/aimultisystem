@@ -1,0 +1,32 @@
+# Build contexts are the repository root because the backend depends on the
+# root-level agents/, intelligence/ and sandbox/ packages.
+.git
+.gitignore
+.github
+
+# Python
+**/__pycache__
+**/*.py[cod]
+**/.pytest_cache
+**/.venv
+**/venv
+backend/codetwin.db
+backend/storage
+*.db
+*.sqlite3
+
+# Node / Next.js
+**/node_modules
+**/.next
+**/out
+**/*.tsbuildinfo
+
+# Not required to build or run the services
+docs
+evaluations
+training
+tests
+frontend/public/media
+.agents
+.env
+.env.*

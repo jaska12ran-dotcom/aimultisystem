@@ -1,0 +1,21 @@
+FROM python:3.11-slim
+
+WORKDIR /workspace
+
+# Install common runtimes, test frameworks, and compilers
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    curl \
+    git \
+    nodejs \
+    npm \
+    default-jre \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN pip install --no-cache-dir pytest pytest-cov
+
+# Security: run untrusted repository tests under non-root unprivileged sandbox user
+RUN useradd -m -u 1000 sandboxuser
+USER sandboxuser
+
+CMD ["bash"]
