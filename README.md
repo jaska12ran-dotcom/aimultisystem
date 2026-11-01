@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # CodeTwin — AI Software Repository Intelligence & Verification Platform
 
 > Production-structured multi-agent platform for deep codebase comprehension, AST-verified software digital twinning, autonomous documentation, and sandboxed test generation.
@@ -159,3 +160,7 @@ cd frontend && npm run build
 - **Explicit limitations.** Every analysis response carries a `limitations` field so
   consumers know what the analysis cannot prove.
 
+=======
+# aimultisystem
+mini project for college
+>>>>>>> 9503bef138d6eedf786b367053f7039d42c23e97
