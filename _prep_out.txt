@@ -1,0 +1,4 @@
+usage: prepare_codesearchnet.py [-h] [--limit LIMIT] [--output-dir OUTPUT_DIR]
+                                [--validation-fraction VALIDATION_FRACTION]
+                                [--test-fraction TEST_FRACTION] [--seed SEED]
+prepare_codesearchnet.py: error: unrecognized arguments: --splits train validation test

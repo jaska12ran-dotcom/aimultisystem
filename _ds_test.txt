@@ -1,0 +1,36 @@
+'(MaxRetryError("HTTPSConnectionPool(host='huggingface.co', port=443): Max retries exceeded with url: /datasets/sentence-transformers/codesearchnet/resolve/main/README.md (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1081)')))"), '(Request ID: 3f670ff1-0b0e-4433-a614-9ac0275bf2f7)')' thrown while requesting HEAD https://huggingface.co/datasets/sentence-transformers/codesearchnet/resolve/main/README.md
+Retrying in 1s [Retry 1/5].
+'(MaxRetryError("HTTPSConnectionPool(host='huggingface.co', port=443): Max retries exceeded with url: /datasets/sentence-transformers/codesearchnet/resolve/main/README.md (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1081)')))"), '(Request ID: ea8c8937-d15d-4790-9a1b-c89963f2c637)')' thrown while requesting HEAD https://huggingface.co/datasets/sentence-transformers/codesearchnet/resolve/main/README.md
+Retrying in 2s [Retry 2/5].
+'(MaxRetryError("HTTPSConnectionPool(host='huggingface.co', port=443): Max retries exceeded with url: /datasets/sentence-transformers/codesearchnet/resolve/main/README.md (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1081)')))"), '(Request ID: ebc964c4-da02-437c-9dce-96d0feb2a039)')' thrown while requesting HEAD https://huggingface.co/datasets/sentence-transformers/codesearchnet/resolve/main/README.md
+Retrying in 4s [Retry 3/5].
+'(MaxRetryError("HTTPSConnectionPool(host='huggingface.co', port=443): Max retries exceeded with url: /datasets/sentence-transformers/codesearchnet/resolve/main/README.md (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1081)')))"), '(Request ID: 4c3ba957-0cac-4c40-b094-852f296d28c5)')' thrown while requesting HEAD https://huggingface.co/datasets/sentence-transformers/codesearchnet/resolve/main/README.md
+Retrying in 8s [Retry 4/5].
+'(MaxRetryError("HTTPSConnectionPool(host='huggingface.co', port=443): Max retries exceeded with url: /datasets/sentence-transformers/codesearchnet/resolve/main/README.md (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1081)')))"), '(Request ID: b9b25047-05fa-4481-acdb-82236fd4279d)')' thrown while requesting HEAD https://huggingface.co/datasets/sentence-transformers/codesearchnet/resolve/main/README.md
+Retrying in 8s [Retry 5/5].
+'(MaxRetryError("HTTPSConnectionPool(host='huggingface.co', port=443): Max retries exceeded with url: /datasets/sentence-transformers/codesearchnet/resolve/main/README.md (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1081)')))"), '(Request ID: 6d2346f6-c980-46a8-8105-2fd893661ba4)')' thrown while requesting HEAD https://huggingface.co/datasets/sentence-transformers/codesearchnet/resolve/main/README.md
+Loading sentence-transformers/codesearchnet (5 rows)...
+Traceback (most recent call last):
+  File "c:\Users\jaska\Desktop\ai multiagent system\_test_dataset.py", line 4, in <module>
+    ds = load_dataset(
+        "sentence-transformers/codesearchnet",
+        split="train[:5]",
+        trust_remote_code=True,
+    )
+  File "C:\Users\jaska\AppData\Roaming\Python\Python314\site-packages\datasets\load.py", line 2062, in load_dataset
+    builder_instance = load_dataset_builder(
+        path=path,
+    ...<12 lines>...
+        **config_kwargs,
+    )
+  File "C:\Users\jaska\AppData\Roaming\Python\Python314\site-packages\datasets\load.py", line 1782, in load_dataset_builder
+    dataset_module = dataset_module_factory(
+        path,
+    ...<8 lines>...
+        _require_custom_configs=bool(config_kwargs),
+    )
+  File "C:\Users\jaska\AppData\Roaming\Python\Python314\site-packages\datasets\load.py", line 1664, in dataset_module_factory
+    raise e1 from None
+  File "C:\Users\jaska\AppData\Roaming\Python\Python314\site-packages\datasets\load.py", line 1565, in dataset_module_factory
+    raise ConnectionError(f"Couldn't reach '{path}' on the Hub ({e.__class__.__name__})") from e
+ConnectionError: Couldn't reach 'sentence-transformers/codesearchnet' on the Hub (SSLError)

@@ -2,9 +2,25 @@
   PASS  HealingDiagnosis: AssertionError detection
   PASS  HealingDiagnosis: quoted module name
   PASS  HealingDiagnosis: NameError detection
-Traceback (most recent call last):
-  File "c:\Users\jaska\Desktop\ai multiagent system\_test_logic.py", line 46, in <module>
-    from agents.bug_detective import (
-    ...<2 lines>...
-    )
-ImportError: cannot import name '_INTENT_KEYWORDS' from 'agents.bug_detective' (c:\Users\jaska\Desktop\ai multiagent system\agents\bug_detective.py)
+  PASS  BugDetective: Python stack trace parsing
+  PASS  BugDetective: JS stack trace parsing
+  PASS  BugDetective: search term extraction
+  PASS  Orchestrator: intent classification (12 intents)
+  PASS  BreakingChange: parameter parsing (basic)
+  PASS  BreakingChange: parameter parsing (defaults/varargs)
+  PASS  BreakingChange: default detection
+  PASS  BreakingChange: return type extraction
+  PASS  SensitiveDataFlow: source detection
+  PASS  SensitiveDataFlow: sink detection
+  PASS  ProductionReadiness: letter grade boundaries
+  PASS  EmbeddingService: single embedding (unit-norm)
+  PASS  EmbeddingService: batch embedding
+  PASS  EmbeddingService: cosine similarity ordering
+  PASS  EmbeddingService: empty text gives zero vector
+  PASS  Schemas: Pydantic model instantiation and defaults
+  PASS  TechnicalDebt: dead code with empty relationships
+  PASS  TechnicalDebt: unreferenced symbol flagged
+  PASS  PRDescription: title from branch name
+
+=======================================================
+ALL TESTS PASSED
