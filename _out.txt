@@ -1,0 +1,53 @@
+
+=== Schemas ===
+  OK  schemas.agent
+  OK  schemas.impact
+  OK  schemas.git_history
+  OK  schemas.technical_debt
+  OK  schemas.test_intel
+  OK  schemas.dev_know
+  OK  schemas.repository
+  OK  schemas.whatif
+
+=== Models ===
+  OK  models.repository
+  OK  models.artifact
+
+=== Services ===
+  OK  rag.service
+  OK  change_impact
+  OK  git_history
+  OK  technical_debt
+  OK  developer_knowledge
+  OK  production_readiness
+  OK  pr_description
+  OK  breaking_change
+  OK  sensitive_data_flow
+  OK  test_intelligence
+
+=== Agents ===
+  OK  doc_agent
+  OK  security_agent
+  OK  test_pipeline
+  OK  qa_agent
+  OK  test_agent
+  OK  self_healing
+  OK  bug_detective
+  OK  orchestrator
+
+=== API Endpoints ===
+  OK  endpoints.health
+  OK  endpoints.repos
+  OK  endpoints.twin
+  OK  endpoints.agents
+  OK  router
+  OK  main_app
+
+=== Training Scripts ===
+  OK  prepare_csn
+  OK  train_embedding
+  OK  evaluate_embedding
+  OK  data_utils
+
+==================================================
+ALL IMPORTS PASSED (1 checks)

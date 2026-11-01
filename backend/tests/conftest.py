@@ -1,8 +1,7 @@
-import asyncio
 import os
 import sys
+import tempfile
 from pathlib import Path
-import pytest
 import pytest_asyncio
 from httpx import AsyncClient, ASGITransport
 
@@ -10,17 +9,13 @@ from httpx import AsyncClient, ASGITransport
 backend_path = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(backend_path))
 
-# Override database for testing to in-memory/temp sqlite
-os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+# Temporary test database file so tables persist across connections during test
+_test_db_file = tempfile.NamedTemporaryFile(suffix=".db", delete=False)
+_test_db_file.close()
+os.environ["DATABASE_URL"] = f"sqlite+aiosqlite:///{Path(_test_db_file.name).as_posix()}"
 
 from app.main import app
-from app.core.database import Base, engine, AsyncSessionLocal
-
-@pytest_asyncio.fixture(scope="session")
-def event_loop():
-    loop = asyncio.new_event_loop()
-    yield loop
-    loop.close()
+from app.core.database import Base, engine
 
 @pytest_asyncio.fixture(autouse=True)
 async def setup_db():

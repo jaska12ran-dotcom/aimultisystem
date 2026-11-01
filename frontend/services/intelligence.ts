@@ -325,6 +325,55 @@ export interface ErrorHistoryEntry {
   resolution_notes?: string | null;
 }
 
+export interface CodeSearchResultItem {
+  language: string;
+  code: string;
+  docstring: string;
+  score: number;
+  match_reason: string;
+}
+
+export interface CodeSearchResult {
+  repository_id: string;
+  query: string;
+  results: CodeSearchResultItem[];
+  total_results: number;
+  dataset_source: string;
+}
+
+export interface CodeExampleItem {
+  language: string;
+  code: string;
+  docstring: string;
+}
+
+export interface SWEBenchInstanceSummary {
+  instance_id: string;
+  repo: string;
+  problem_statement: string;
+  base_commit?: string;
+  version?: string;
+  patch?: string;
+  modified_files?: string[];
+  fail_to_pass?: string[];
+  score: number;
+  match_reason: string;
+}
+
+export interface SWEBenchSearchResult {
+  query: string;
+  total_results: number;
+  results: SWEBenchInstanceSummary[];
+  dataset_source: string;
+}
+
+export interface CodeExamplesResult {
+  repository_id: string;
+  concept: string;
+  examples: CodeExampleItem[];
+  language_filter: string | null;
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE}${path}`, {
     ...init,
@@ -427,6 +476,23 @@ export const intelligenceApi = {
     }),
   errors: (id: string, resolved?: boolean) => request<ErrorHistoryEntry[]>(`/repositories/${id}/errors${resolved !== undefined ? `?resolved=${resolved}` : ''}`),
   errorSummary: (id: string) => request<RepositoryErrorSummary>(`/repositories/${id}/error-summary`),
+  codeSearch: (id: string, query: string, language?: string, limit: number = 5) =>
+    request<CodeSearchResult>(`/repositories/${id}/code-search`, {
+      method: 'POST',
+      body: JSON.stringify({ query, language, limit }),
+    }),
+  swebenchSearch: (id: string, query: string, repoFilter?: string, limit: number = 5) =>
+    request<SWEBenchSearchResult>(`/repositories/${id}/swebench/search`, {
+      method: 'POST',
+      body: JSON.stringify({ query, repo_filter: repoFilter, limit }),
+    }),
+  swebenchInstance: (id: string, instanceId: string) =>
+    request<SWEBenchInstanceSummary>(`/repositories/${id}/swebench/${instanceId}`),
+  codeExamples: (id: string, concept: string, language?: string, limit: number = 3) =>
+    request<CodeExamplesResult>(`/repositories/${id}/code-examples`, {
+      method: 'POST',
+      body: JSON.stringify({ concept, language, limit }),
+    }),
 };
 
 export type RepositoryOption = Repository;

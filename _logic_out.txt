@@ -1,0 +1,10 @@
+  PASS  HealingDiagnosis: unquoted ModuleNotFoundError
+  PASS  HealingDiagnosis: AssertionError detection
+  PASS  HealingDiagnosis: quoted module name
+  PASS  HealingDiagnosis: NameError detection
+Traceback (most recent call last):
+  File "c:\Users\jaska\Desktop\ai multiagent system\_test_logic.py", line 46, in <module>
+    from agents.bug_detective import (
+    ...<2 lines>...
+    )
+ImportError: cannot import name '_INTENT_KEYWORDS' from 'agents.bug_detective' (c:\Users\jaska\Desktop\ai multiagent system\agents\bug_detective.py)

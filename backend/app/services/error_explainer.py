@@ -16,10 +16,11 @@ import re
 from typing import Dict, List, Optional, Any
 
 from pydantic import BaseModel, Field
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.repository import CodeSymbol, Repository, RepositoryFile, ErrorLog
+from app.services.code_search_dataset import CodeSearchDatasetService, CodeSnippet
 
 
 # ── Schemas ───────────────────────────────────────────────────────────────────
@@ -44,6 +45,7 @@ class ErrorExplanation(BaseModel):
     evidence: List[FailureEvidence] = Field(default_factory=list)
     source_symbol: Optional[str] = None
     source_symbol_file: Optional[str] = None
+    code_example: Optional[CodeSnippet] = None
 
 
 class ErrorHistoryEntry(BaseModel):
@@ -66,7 +68,7 @@ class RepositoryErrorSummary(BaseModel):
     by_type: Dict[str, int]
     recent_errors: List[ErrorHistoryEntry]
     summary: str
-</model_
+
 
 
 # ── Internals ─────────────────────────────────────────────────────────────────
@@ -77,82 +79,73 @@ def _normalize_path(value: str) -> str:
     return value.replace("\\", "/").strip("/").casefold()
 
 
-def _classify_error(error_type: str, error_message: str) -> tuple[str, str]:
+def _classify_error(error_type: str, error_message: str) -> tuple[str, tuple[str, str]]:
     """Classify an error into a category and generate likely cause + suggested fix."""
 
     text = (error_type + ":" + error_message).lower()
 
     # Import-related
     if any(kw in text for kw in ["modulenotfounderror", "importerror", "no module named"]):
-        return "import",
-        (
+        return "import", (
             "A required module could not be found.",
             "Verify the import path, install the dependency, or check that the module "
             "exists in the indexed repository.",
-        ),
+        )
 
     # Syntax-related
     if any(kw in text for kw in ["syntaxerror", "indentationerror", "unexpected indent"]):
-        return "syntax",
-        (
+        return "syntax", (
             "A Python syntax error prevents parsing the file.",
             "Fix the reported syntax error at the cited line and re-run.",
-        ),
+        )
 
     # Timeout-related
     if "timeout" in text:
-        return "timeout",
-        (
+        return "timeout", (
             "The operation exceeded its time budget.",
             "Check for blocking I/O, unbounded loops, or recursive calls without a base case.",
-        ),
+        )
 
     # Permission-related
     if any(kw in text for kw in ["permissionerror", "access is denied", "not authorized"]):
-        return "permission",
-        (
+        return "permission", (
             "The execution lacks filesystem or network permission.",
             "Adjust sandbox permissions or use a temporary directory the process can write to.",
-        ),
+        )
 
     # Name error (undefined variable)
     if "nameerror" in text or "undefined name" in text:
-        return "name",
-        (
+        return "name", (
             "An undefined name or variable was referenced.",
             "Verify the variable is defined in the current scope or imported correctly.",
-        ),
+        )
 
     # Attribute error
     if "attributeerror" in text:
-        return "attribute",
-        (
+        return "attribute", (
             "An object does not have the expected attribute or method.",
             "Check the object type and ensure the attribute/method exists before access.",
-        ),
+        )
 
     # Key error
     if "keyerror" in text:
-        return "key",
-        (
+        return "key", (
             "A dictionary key was not found.",
             "Verify the key exists before accessing it, or use .get() with a default.",
-        ),
+        )
 
     # Value error
     if "valueerror" in text:
-        return "value",
-        (
+        return "value", (
             "An invalid value was passed to a function or constructor.",
             "Validate input before passing it; check expected types and ranges.",
-        ),
+        )
 
     # Runtime/other
-    return "runtime",
-    (
+    return "runtime", (
         "A runtime error occurred.",
         "Review the full stack trace and fix the underlying issue in the cited file/line.",
-    ),
+    )
 
 
 # ── Service ───────────────────────────────────────────────────────────────────
@@ -164,19 +157,30 @@ class ErrorExplainerService:
     def __init__(self, db: AsyncSession, repository: Repository):
         self.db = db
         self.repository = repository
+        self.code_search = CodeSearchDatasetService()
 
     async def explain_error(
         self, error_type: str, error_message: str, file_path: Optional[str] = None, context: Optional[Dict[str, Any]] = None
     ) -> ErrorExplanation:
         """Explain a single error and map evidence to indexed symbols."""
 
-        category, (likely_cause, suggested_fix) = _classify_error(error_type, error_message or "")
+        _category, (likely_cause, suggested_fix) = _classify_error(error_type, error_message or "")
 
         # Extract evidence (file locations) from the error message / traceback
         evidence = self._extract_evidence(error_message or "", file_path)
 
         # Map first evidence location back to an indexed symbol
         source_symbol, source_symbol_file = await self._map_to_symbol(evidence)
+
+        # Get a code example for this error type from the dataset
+        code_example = None
+        try:
+            code_example = await self.code_search.get_error_fix_example(
+                error_type=error_type,
+                file_path=file_path,
+            )
+        except Exception:
+            pass  # Dataset unavailable, skip example
 
         # Build a summary
         summary = f"Error [{error_type}]: {likely_cause}"
@@ -191,6 +195,7 @@ class ErrorExplainerService:
             evidence=evidence,
             source_symbol=source_symbol,
             source_symbol_file=source_symbol_file,
+            code_example=code_example,
         )
 
     def _extract_evidence(self, error_message: str, explicit_file: Optional[str] = None) -> List[FailureEvidence]:
@@ -286,8 +291,6 @@ class ErrorExplainerService:
         resolved: Optional[bool] = None,
     ) -> List[ErrorHistoryEntry]:
         """Retrieve error history for this repository, optionally filtered."""
-        from sqlalchemy import select
-        from datetime import timezone
 
         query = select(ErrorLog).where(ErrorLog.repository_id == self.repository.id)
         if resolved is not None:
@@ -313,7 +316,6 @@ class ErrorExplainerService:
 
     async def get_summary(self) -> RepositoryErrorSummary:
         """Generate a repository-level error summary."""
-        from sqlalchemy import select, func
 
         # Total counts
         total_res = await self.db.scalar(

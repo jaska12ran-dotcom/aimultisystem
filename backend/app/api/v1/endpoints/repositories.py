@@ -10,8 +10,9 @@ Repository REST endpoints
 from __future__ import annotations
 
 import shutil
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import List
+from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status, Body
 from sqlalchemy import select
@@ -21,12 +22,12 @@ from app.core.config import settings
 from app.core.database import get_db
 from app.models.repository import Repository
 from app.schemas.repository import (
+    ErrorLogResponse,
     RepositoryCloneRequest,
     RepositoryLocalRequest,
     RepositoryResponse,
 )
 from app.services.ingestion import IngestionService, ValidationError, ArchiveExtractionError
-from app.services.error_explainer import ErrorExplainerService
 
 router = APIRouter()
 
@@ -185,7 +186,6 @@ async def submit_error(
     """Submit an error that occurred during repository analysis or execution."""
     repo = await _get_or_404(repo_id, db)
     from app.models.repository import ErrorLog
-    from sqlalchemy import select
     
     error_log = ErrorLog(
         repository_id=repo_id,
@@ -209,7 +209,6 @@ async def list_errors(
     """List error logs for a repository, optionally filtered by resolution status."""
     repo = await _get_or_404(repo_id, db)
     from app.models.repository import ErrorLog
-    from sqlalchemy import select
     
     query = select(ErrorLog).where(ErrorLog.repository_id == repo_id)
     if resolved is not None:
@@ -229,7 +228,6 @@ async def resolve_error(
     """Mark an error as resolved with notes."""
     repo = await _get_or_404(repo_id, db)
     from app.models.repository import ErrorLog
-    from sqlalchemy import select
     
     error_log_res = await db.execute(
         select(ErrorLog).where(
@@ -247,6 +245,120 @@ async def resolve_error(
     await db.commit()
     await db.refresh(error_log)
     return {"id": error_log.id, "status": "resolved", "resolution_notes": resolution_notes}
+
+
+# ──────────────────────────────────────────────────────────────
+# Code Search Dataset Integration
+# ──────────────────────────────────────────────────────────────
+
+@router.post("/{repo_id}/code-search", response_model=Dict[str, Any])
+async def search_code_snippets(
+    repo_id: str,
+    query: str = Body(..., description="Search query for code snippets"),
+    language: Optional[str] = Body(None, description="Language filter (e.g., python, javascript)"),
+    limit: int = Body(5, description="Maximum number of results"),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Search for code snippets using CodeSearchNet dataset.
+    Returns code examples relevant to the query.
+    """
+    repo = await _get_or_404(repo_id, db)
+    from app.services.code_search_dataset import CodeSearchDatasetService
+
+    service = CodeSearchDatasetService()
+    result = await service.search(query=query, language=language, limit=limit)
+
+    return {
+        "repository_id": repo_id,
+        "query": result.query,
+        "results": [
+            {
+                "language": r.snippet.language,
+                "code": r.snippet.code,
+                "docstring": r.snippet.docstring,
+                "score": r.score,
+                "match_reason": r.match_reason,
+            }
+            for r in result.results
+        ],
+        "total_results": result.total_results,
+        "dataset_source": result.dataset_source,
+    }
+
+
+@router.post("/{repo_id}/code-examples", response_model=Dict[str, Any])
+async def get_code_examples(
+    repo_id: str,
+    concept: str = Body(..., description="Concept to find examples for"),
+    language: Optional[str] = Body(None, description="Language filter"),
+    limit: int = Body(3, description="Maximum number of examples"),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Get code examples for a specific concept using CodeSearchNet dataset.
+    """
+    repo = await _get_or_404(repo_id, db)
+    from app.services.code_search_dataset import CodeSearchDatasetService
+
+    service = CodeSearchDatasetService()
+    result = await service.get_examples(concept=concept, language=language, limit=limit)
+
+    return {
+        "repository_id": repo_id,
+        "concept": result.concept,
+        "examples": [
+            {
+                "language": ex.language,
+                "code": ex.code,
+                "docstring": ex.docstring,
+            }
+            for ex in result.examples
+        ],
+        "language_filter": result.language,
+    }
+
+
+# ──────────────────────────────────────────────────────────────
+# SWE-bench Verified Integration
+# ──────────────────────────────────────────────────────────────
+
+@router.post("/{repo_id}/swebench/search", response_model=Dict[str, Any])
+async def search_swebench_fixes(
+    repo_id: str,
+    query: str = Body(..., description="Query describing the issue or error"),
+    repo_filter: Optional[str] = Body(None, description="Optional upstream repository filter"),
+    limit: int = Body(5, description="Maximum number of results"),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Search SWE-bench Verified bug fixes and patches.
+    """
+    repo = await _get_or_404(repo_id, db)
+    from app.services.swebench_service import SWEBenchService
+
+    service = SWEBenchService()
+    result = service.search_fixes(query=query, repo_filter=repo_filter, limit=limit)
+    return result.model_dump()
+
+
+@router.get("/{repo_id}/swebench/{instance_id}", response_model=Dict[str, Any])
+async def get_swebench_instance(
+    repo_id: str,
+    instance_id: str,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Get detailed verified patch and problem statement for a specific SWE-bench instance.
+    """
+    repo = await _get_or_404(repo_id, db)
+    from app.services.swebench_service import SWEBenchService
+
+    service = SWEBenchService()
+    instance = service.get_instance(instance_id)
+    if not instance:
+        raise HTTPException(status_code=404, detail="SWE-bench instance not found")
+    return instance.model_dump()
 
 
 # ──────────────────────────────────────────────────────────────

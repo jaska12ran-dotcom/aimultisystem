@@ -22,6 +22,7 @@ import {
   DocumentationDrift, GitHistory, ImpactAnalysis, ImpactComponent, RepositoryGraph, SecurityAnalysis,
   RepositoryIndexStatus, RegressionSelection, TestStrengthReport, TechnicalDebtReport, OnboardingGuide, BusinessRuleReport, CodeMemory,
   CodeHealthReport, DependencySecurityReport, TestFailureExplanationReport, OrchestratorStep,
+  ErrorHistoryEntry, RepositoryErrorSummary, CodeSearchResult,
   intelligenceApi,
 } from '../services/intelligence';
 import { CodeSymbol, FileItem, Repository } from '../types';
@@ -33,6 +34,7 @@ const NAV_ITEMS = [
   { id: 'explorer', label: 'Repository explorer', icon: FileCode2, group: 'Workspace' },
   { id: 'graph', label: 'Knowledge graph', icon: Network, group: 'Workspace' },
   { id: 'chat', label: 'AI chat', icon: Sparkles, group: 'Workspace' },
+  { id: 'code-search', label: 'Code search', icon: Search, group: 'Workspace' },
   { id: 'docs', label: 'Documentation', icon: BookOpen, group: 'Quality' },
   { id: 'tests', label: 'Tests', icon: TestTube2, group: 'Quality' },
   { id: 'security', label: 'Security', icon: Shield, group: 'Quality' },
@@ -203,6 +205,10 @@ export default function RepositoryDashboard() {
   const [errorSummary, setErrorSummary] = useState<RepositoryErrorSummary | null>(null);
   const [errorHistoryLoading, setErrorHistoryLoading] = useState(false);
   const [errorResolvedFilter, setErrorResolvedFilter] = useState<'all' | 'resolved' | 'unresolved'>('all');
+  const [codeSearchQuery, setCodeSearchQuery] = useState('');
+  const [codeSearchLanguage, setCodeSearchLanguage] = useState('');
+  const [codeSearchResults, setCodeSearchResults] = useState<CodeSearchResult | null>(null);
+  const [codeSearchLoading, setCodeSearchLoading] = useState(false);
   const [failureOutput, setFailureOutput] = useState('');
   const [failureReport, setFailureReport] = useState<TestFailureExplanationReport | null>(null);
   const [failureLoading, setFailureLoading] = useState(false);
@@ -378,7 +384,6 @@ export default function RepositoryDashboard() {
 
   const loadOnboarding = async () => { if (!selectedRepo) return; setOnboardingLoading(true); try { setOnboarding(await intelligenceApi.onboarding(selectedRepo.id)); } catch (reason) { setError(reason instanceof Error ? reason.message : 'Onboarding analysis failed.'); } finally { setOnboardingLoading(false); } };
   const loadBusinessRules = async () => { if (!selectedRepo) return; setRulesLoading(true); try { setBusinessRules(await intelligenceApi.businessRules(selectedRepo.id)); } catch (reason) { setError(reason instanceof Error ? reason.message : 'Business rule analysis failed.'); } finally { setRulesLoading(false); } };
-  const loadErrorHistory = async () => {
   const loadCodeMemory = async (event: React.FormEvent) => { event.preventDefault(); if (!selectedRepo || !memoryTarget.trim()) return; try { setMemory(await intelligenceApi.codeMemory(selectedRepo.id, memoryTarget.trim())); } catch (reason) { setError(reason instanceof Error ? reason.message : 'Code memory lookup failed.'); } };
 
   const loadCodeHealth = async () => {
@@ -420,6 +425,20 @@ export default function RepositoryDashboard() {
     try { setFailureReport(await intelligenceApi.explainTestFailures(selectedRepo.id, failureOutput)); }
     catch (reason) { setError(reason instanceof Error ? reason.message : 'Test failure explanation failed.'); }
     finally { setFailureLoading(false); }
+  };
+
+  const searchCode = async () => {
+    if (!selectedRepo || !codeSearchQuery.trim()) return;
+    setCodeSearchLoading(true);
+    try {
+      setCodeSearchResults(await intelligenceApi.codeSearch(
+        selectedRepo.id,
+        codeSearchQuery,
+        codeSearchLanguage || undefined,
+        10,
+      ));
+    } catch (reason) { setError(reason instanceof Error ? reason.message : 'Code search failed.'); }
+    finally { setCodeSearchLoading(false); }
   };
 
   useEffect(() => {
@@ -1148,6 +1167,112 @@ export default function RepositoryDashboard() {
     return <div className="space-y-4"><Panel><PanelTitle icon={Boxes} title="Architecture map" detail="Observed repository structure and persisted graph relations" /><div className="grid gap-3 p-5 sm:grid-cols-2 xl:grid-cols-4"><MiniMetric label="Modules / files" value={fmt(files.length)} /><MiniMetric label="Symbols" value={fmt(symbols.length)} /><MiniMetric label="Relationships" value={fmt(graph?.counts.relationships || 0)} /><MiniMetric label="Dependency packages" value={fmt(dependencies.length)} /></div></Panel><div className="grid gap-4 xl:grid-cols-2"><Panel><PanelTitle icon={Network} title="Relationship types" detail="Graph index counts; not an architecture violation scan" /><div className="space-y-4 p-5">{Object.entries(relationCounts).sort((a, b) => b[1] - a[1]).map(([type, count]) => <div key={type}><div className="mb-1.5 flex justify-between text-[10px]"><span className="text-slate-400">{type}</span><span className="text-slate-300">{count}</span></div><div className="h-1.5 rounded-full bg-slate-800"><div className="h-full rounded-full bg-indigo-400" style={{ width: `${Math.max(2, count / Math.max(1, graph?.counts.relationships || 1) * 100)}%` }} /></div></div>)}{!Object.keys(relationCounts).length && <p className="text-xs text-slate-500">No graph relationships are indexed.</p>}</div></Panel><Panel><PanelTitle icon={Package} title="Dependencies" detail="Declared dependencies extracted from repository manifests" /><div className="max-h-[450px] divide-y divide-white/[0.05] overflow-auto">{dependencies.map((dep) => <div key={dep.id} className="flex items-center justify-between gap-3 px-4 py-3"><div className="flex min-w-0 items-center gap-2"><Package size={13} className="shrink-0 text-cyan-300" /><span className="truncate text-xs text-slate-200">{dep.package_name}</span></div><span className="shrink-0 text-[9px] text-slate-600">{dep.ecosystem} {dep.version_spec || ''}</span></div>)}{!dependencies.length && <p className="p-5 text-xs text-slate-500">No dependencies were extracted.</p>}</div></Panel></div></div>;
   };
 
+  const renderErrorSection = () => (
+    <div className="space-y-4">
+      <Panel>
+        <PanelTitle icon={Bug} title="Error history" detail={errorSummary?.summary || 'No errors logged yet'} />
+        <div className="p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <label className="text-[10px] font-medium uppercase tracking-wide text-slate-400">Filter</label>
+            <select
+              value={errorResolvedFilter}
+              onChange={(e) => setErrorResolvedFilter(e.target.value as 'all' | 'resolved' | 'unresolved')}
+              className="ml-2 rounded-lg border border-white/[0.08] bg-[#0a1018] px-3 py-2 text-xs text-slate-200 outline-none"
+            >
+              <option value="all">All errors</option>
+              <option value="resolved">Resolved</option>
+              <option value="unresolved">Unresolved</option>
+            </select>
+          </div>
+          {errorHistory.length > 0 ? (
+            <div className="space-y-2 max-h-[400px] overflow-auto">
+              {errorHistory.map((entry) => (
+                <div key={entry.id} className="flex items-start gap-3 rounded-xl px-3 py-2.5 transition hover:bg-white/[0.035]">
+                  <span className={cx('mt-1 h-2 w-2 shrink-0 rounded-full', entry.resolved ? 'bg-green-400' : 'bg-red-400')} />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-slate-100 truncate">{entry.error_type}</p>
+                    <p className="text-[10px] text-slate-400 truncate">{entry.error_message.substring(0, 150)}{entry.error_message.length > 150 ? '...' : ''}</p>
+                  </div>
+                  <div className="text-[10px] text-slate-500">{new Date(entry.occurred_at).toLocaleString()}</div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-slate-500">No errors logged for this repository.</p>
+          )}
+          {errorSummary && (
+            <div className="mt-3 pt-3 border-t border-white/[0.06] text-[11px] text-slate-400">
+              <div>Total: {errorSummary.total_errors} errors</div>
+              <div>Resolved: {errorSummary.resolved_errors} | Unresolved: {errorSummary.unresolved_errors}</div>
+              {errorSummary.by_type && Object.entries(errorSummary.by_type).length > 0 && (
+                <div>By type: {Object.entries(errorSummary.by_type).map(([k, v]) => `${v} × ${k}`).join(', ')}</div>
+              )}
+            </div>
+          )}
+        </div>
+      </Panel>
+    </div>
+  );
+
+  const renderCodeSearch = () => (
+    <div className="space-y-4">
+      <Panel>
+        <PanelTitle icon={Search} title="Code Search" detail="Search for code examples using CodeSearchNet dataset" />
+        <div className="p-5">
+          <div className="flex gap-2 mb-4">
+            <input
+              value={codeSearchQuery}
+              onChange={(e) => setCodeSearchQuery(e.target.value)}
+              placeholder="Search for code patterns, functions, or concepts..."
+              className="flex-1 rounded-lg border border-white/[0.08] bg-[#0a1018] px-3 py-2 text-xs text-slate-200 outline-none placeholder:text-slate-600"
+            />
+            <select
+              value={codeSearchLanguage}
+              onChange={(e) => setCodeSearchLanguage(e.target.value)}
+              className="rounded-lg border border-white/[0.08] bg-[#0a1018] px-3 py-2 text-xs text-slate-200 outline-none"
+            >
+              <option value="">All languages</option>
+              <option value="python">Python</option>
+              <option value="javascript">JavaScript</option>
+              <option value="java">Java</option>
+              <option value="go">Go</option>
+            </select>
+            <button
+              onClick={() => void searchCode()}
+              disabled={codeSearchLoading || !codeSearchQuery.trim()}
+              className="rounded-lg bg-indigo-500 px-4 py-2 text-xs font-semibold text-white disabled:opacity-50"
+            >
+              {codeSearchLoading ? 'Searching...' : 'Search'}
+            </button>
+          </div>
+          {codeSearchResults && (
+            <div className="space-y-3">
+              <p className="text-[11px] text-slate-400">Found {codeSearchResults.total_results} results</p>
+              {codeSearchResults.results.map((result, index) => (
+                <div key={index} className="rounded-xl border border-white/[0.06] p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="rounded border border-cyan-300/20 bg-cyan-300/10 px-2 py-0.5 text-[9px] text-cyan-300">{result.language}</span>
+                    <span className="text-[10px] text-slate-500">Score: {(result.score * 100).toFixed(1)}%</span>
+                    <span className="text-[10px] text-slate-500">({result.match_reason})</span>
+                  </div>
+                  <pre className="rounded-lg bg-[#0b111a] p-3 text-[10px] text-slate-300 overflow-auto max-h-[200px]">
+                    <code>{result.code}</code>
+                  </pre>
+                  {result.docstring && (
+                    <p className="mt-2 text-[10px] text-slate-500">{result.docstring}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+          {!codeSearchResults && !codeSearchLoading && (
+            <p className="text-xs text-slate-500">Enter a query to search for code examples.</p>
+          )}
+        </div>
+      </Panel>
+    </div>
+  );
+
   const renderDebt = () => <div className="space-y-4">
     <Panel><PanelTitle icon={AlertTriangle} title="Technical debt payoff planner" detail="Prioritized static and historical signals; no source changes are made" action={<button onClick={() => void runDebtAnalysis()} disabled={debtLoading} className="flex items-center gap-2 rounded-lg bg-indigo-500 px-3 py-2 text-[10px] font-semibold text-white disabled:opacity-50">{debtLoading ? <LoaderCircle size={13} className="animate-spin" /> : <RefreshCw size={13} />} Analyze debt</button>} />
       <div className="grid gap-3 p-5 sm:grid-cols-3"><MiniMetric label="High-complexity symbols" value={fmt(highComplexity.length)} /><MiniMetric label="History hotspots" value={fmt(history?.high_risk_hotspots.length || 0)} /><MiniMetric label="Findings" value={debt ? fmt(debt.findings.length) : 'Not analyzed'} /></div>
@@ -1298,6 +1423,7 @@ export default function RepositoryDashboard() {
       );
       case 'git': return renderGit();
       case 'errors': return renderErrorSection();
+      case 'code-search': return renderCodeSearch();
       case 'debt': return renderDebt();
       case 'onboarding': return renderOnboarding();
       case 'rules': return renderRules();
